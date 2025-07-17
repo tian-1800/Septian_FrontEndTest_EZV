@@ -106,13 +106,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const res = await fetch(`${JSONPLACEHOLDER_URL}/todos`);
   const todos: Todo[] = await res.json();
 
-  const paths = todos.slice(0, 100).map((todo) => ({
+  const paths = todos.map((todo) => ({
     params: { id: todo.id.toString() },
   }));
 
   return {
     paths,
-    fallback: "blocking",
+    fallback: false,
   };
 };
 

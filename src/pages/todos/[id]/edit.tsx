@@ -1,6 +1,4 @@
-import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import Layout from "@/components/Layout";
 import TodoForm from "@/components/TodoForm";
 import { JSONPLACEHOLDER_URL } from "@/config/env-config";
 
