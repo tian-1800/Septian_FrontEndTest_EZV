@@ -11,6 +11,10 @@ export const todosApi = createApi({
       query: ({ start = 0, limit = 10 } = {}) => `/todos?_start=${start}&_limit=${limit}`,
       providesTags: ["Todo"],
     }),
+    getTodoById: builder.query<Todo, number>({
+      query: (id) => `/todos/${id}`,
+      providesTags: (result, error, id) => [{ type: "Todo", id }],
+    }),
     createTodo: builder.mutation<Todo, CreateTodoRequest>({
       query: (newTodo) => ({
         url: "/todos",
@@ -22,4 +26,4 @@ export const todosApi = createApi({
   }),
 });
 
-export const { useGetTodosQuery, useCreateTodoMutation } = todosApi;
+export const { useGetTodosQuery, useGetTodoByIdQuery, useCreateTodoMutation } = todosApi;
