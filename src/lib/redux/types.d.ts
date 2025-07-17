@@ -10,3 +10,10 @@ export interface CreateTodoRequest {
   completed: boolean;
   userId: number;
 }
+
+export interface UpdateTodoRequest {
+  id: number;
+  title: string;
+  completed: boolean;
+  userId: number;
+}

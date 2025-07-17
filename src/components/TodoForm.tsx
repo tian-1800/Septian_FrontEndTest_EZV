@@ -1,18 +1,25 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/router";
 import { CheckCircle, Circle, User, FileText } from "lucide-react";
-import { useCreateTodoMutation } from "@/lib/redux/services/todos-api";
+import { useCreateTodoMutation, useUpdateTodoMutation } from "@/lib/redux/services/todos-api";
+import { Todo } from "@/lib/redux/types";
 
 const leftSideContent = ["Create and organize tasks efficiently", "Placeholder Text 1", "Placeholder Text 2"];
 
-export default function TodoForm() {
+interface TodoFormProps {
+  initialData?: Todo;
+  isEdit?: boolean;
+}
+
+export default function TodoForm({ initialData, isEdit = false }: TodoFormProps) {
   const router = useRouter();
   const [createTodo, { isLoading: isCreating }] = useCreateTodoMutation();
+  const [updateTodo, { isLoading: isUpdating }] = useUpdateTodoMutation();
 
   const [formData, setFormData] = useState({
-    title: "",
-    completed: false,
-    userId: 1,
+    title: initialData?.title || "",
+    completed: initialData?.completed || false,
+    userId: initialData?.userId || 1,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,7 +49,14 @@ export default function TodoForm() {
     if (!validateForm()) return;
 
     try {
-      await createTodo(formData).unwrap();
+      if (isEdit && initialData) {
+        await updateTodo({
+          id: initialData.id,
+          ...formData,
+        }).unwrap();
+      } else {
+        await createTodo(formData).unwrap();
+      }
 
       router.push("/");
     } catch (error) {
@@ -50,7 +64,7 @@ export default function TodoForm() {
     }
   };
 
-  const isLoading = isCreating;
+  const isLoading = isCreating || isUpdating;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -140,7 +154,7 @@ export default function TodoForm() {
                   disabled={isLoading}
                   className="px-6 py-3 bg-indigo-600 text-white text-base font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-3 focus:ring-indigo-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
                 >
-                  {isLoading ? "Saving..." : "Create Todo"}
+                  {isLoading ? "Saving..." : isEdit ? "Update Todo" : "Create Todo"}
                 </button>
                 <button
                   type="button"
