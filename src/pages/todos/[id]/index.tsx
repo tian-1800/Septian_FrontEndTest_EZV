@@ -87,6 +87,14 @@ export default function TodoDetailPage({ todo: initialTodo, error }: TodoDetailP
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Todos</span>
             </Link>
+            <div className="flex items-center space-x-4">
+              <Link
+                href={`/todos/${todo.id}/edit`}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                Edit Todo
+              </Link>
+            </div>
           </div>
         </div>
       </div>
