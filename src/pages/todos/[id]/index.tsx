@@ -1,7 +1,9 @@
-import { GetServerSideProps } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import Link from "next/link";
 import { CheckCircle, Circle, ArrowLeft, User, Calendar } from "lucide-react";
 import { JSONPLACEHOLDER_URL } from "@/config/env-config";
+import { useGetTodoByIdQuery } from "@/lib/redux/services/todos-api";
+import { useRouter } from "next/router";
 
 interface Todo {
   id: number;
@@ -15,7 +17,13 @@ interface TodoDetailPageProps {
   error?: string;
 }
 
-export default function TodoDetailPage({ todo, error }: TodoDetailPageProps) {
+export default function TodoDetailPage({ todo: initialTodo, error }: TodoDetailPageProps) {
+  const router = useRouter();
+  const id = Number(router.query.id);
+
+  const { data } = useGetTodoByIdQuery(id);
+  const todo = data || initialTodo;
+
   if (error || !todo) {
     return (
       <div className="max-w-3xl mx-auto text-center py-12">
@@ -86,7 +94,21 @@ export default function TodoDetailPage({ todo, error }: TodoDetailPageProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps<TodoDetailPageProps> = async (context) => {
+export const getStaticPaths: GetStaticPaths = async () => {
+  const res = await fetch(`${JSONPLACEHOLDER_URL}/todos`);
+  const todos: Todo[] = await res.json();
+
+  const paths = todos.slice(0, 100).map((todo) => ({
+    params: { id: todo.id.toString() },
+  }));
+
+  return {
+    paths,
+    fallback: "blocking",
+  };
+};
+
+export const getStaticProps: GetStaticProps<TodoDetailPageProps> = async (context) => {
   const { id } = context.params!;
   const todoId = parseInt(id as string);
 
@@ -96,6 +118,7 @@ export const getServerSideProps: GetServerSideProps<TodoDetailPageProps> = async
         todo: null,
         error: "Invalid todo ID",
       },
+      revalidate: 60,
     };
   }
 
@@ -109,6 +132,7 @@ export const getServerSideProps: GetServerSideProps<TodoDetailPageProps> = async
             todo: null,
             error: "Todo not found",
           },
+          revalidate: 60,
         };
       }
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,14 +144,16 @@ export const getServerSideProps: GetServerSideProps<TodoDetailPageProps> = async
       props: {
         todo,
       },
+      revalidate: 3600,
     };
   } catch (error) {
-    console.error("Error fetching todo:", error);
+    console.error(`Error fetching todo ${todoId}:`, error);
     return {
       props: {
         todo: null,
-        error: "Failed to load todo",
+        // do not return error, let client refetch the data
       },
+      revalidate: 60,
     };
   }
 };
