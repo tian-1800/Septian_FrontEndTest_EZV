@@ -7,8 +7,8 @@ export const todosApi = createApi({
   baseQuery,
   tagTypes: ["Todo"],
   endpoints: (builder) => ({
-    getTodos: builder.query<Todo[], void>({
-      query: () => "/todos",
+    getTodos: builder.query<Todo[], { start?: number; limit?: number }>({
+      query: ({ start = 0, limit = 10 } = {}) => `/todos?_start=${start}&_limit=${limit}`,
       providesTags: ["Todo"],
     }),
     createTodo: builder.mutation<Todo, CreateTodoRequest>({

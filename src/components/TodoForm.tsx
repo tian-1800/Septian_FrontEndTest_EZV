@@ -124,7 +124,7 @@ export default function TodoForm() {
                   type="number"
                   id="userId"
                   value={formData.userId}
-                  onChange={(e) => handleInputChange("userId", parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleInputChange("userId", Number(e.target.value) || 0)}
                   placeholder="Enter user ID"
                   min="1"
                   className={`w-full px-4 py-3 border rounded-md text-base bg-white transition-all duration-200 focus:outline-none focus:ring-3 focus:ring-indigo-100 focus:border-indigo-600 ${
